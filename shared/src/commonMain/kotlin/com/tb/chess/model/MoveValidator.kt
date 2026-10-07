@@ -59,7 +59,7 @@ object MoveValidator {
     }
 
     fun getLegalMoves(board: ChessBoard, from: Position): List<Position> {
-        return board.getAllPositions().filter { to -> isLegalMove(board, from, to) }
+        return board.getAllPositions().filter { to -> isCompletelyLegalMove(board, from, to) }
     }
 
     fun findKingPosition(board: ChessBoard, color: PieceColor): Position? {
