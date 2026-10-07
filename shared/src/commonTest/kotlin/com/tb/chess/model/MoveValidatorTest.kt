@@ -1,5 +1,6 @@
 package com.tb.chess.model
 
+import com.tb.chess.model.movements.MoveValidator
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue

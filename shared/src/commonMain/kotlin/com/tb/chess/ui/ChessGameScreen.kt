@@ -197,7 +197,7 @@ fun ChessGameScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                // Title & Turn Indicator Card with Check / Checkmate / Stalemate alerts
+                // Title & Turn Indicator Card with Check / Checkmate / Stalemate alerts and Undo button inside header
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -205,7 +205,7 @@ fun ChessGameScreen() {
                     colors = CardDefaults.cardColors(
                         containerColor = when {
                             game.isCheckmate -> Color(0xFFB71C1C)
-                            game.isStalemate -> Color(0xFFE65100)
+                            game.isStalemate || game.isDrawByRepetition -> Color(0xFFE65100)
                             else -> Color(0xFF383838)
                         }
                     ),
@@ -214,23 +214,42 @@ fun ChessGameScreen() {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 24.dp, vertical = 12.dp),
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Button(
+                                onClick = { game.undo() },
+                                enabled = game.canUndo,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFFE65100),
+                                    disabledContainerColor = Color(0xFF555555)
+                                ),
+                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                            ) {
+                                Text("⟲ Deshacer", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            }
+
+                            Text(
+                                text = when {
+                                    game.isCheckmate -> "¡JAQUE MATE! Ganan las ${if (game.winner == PieceColor.WHITE) "Blancas ♔" else "Negras ♚"}"
+                                    game.isStalemate -> "¡TABLAS POR AHOGADO! Empate 🤝"
+                                    game.isDrawByRepetition -> "¡TABLAS POR REPETICIÓN! Empate 🤝"
+                                    game.isKingInCheck -> "¡JAQUE! ⚠️"
+                                    else -> if (game.isVsAi) "Modo: vs Computadora 🤖" else "Modo: 2 Jugadores 👥"
+                                },
+                                style = MaterialTheme.typography.titleMedium,
+                                color = if (game.isCheckmate || game.isStalemate || game.isDrawByRepetition || game.isKingInCheck) Color.White else Color(0xFFD2B48C),
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+
                         Text(
-                            text = when {
-                                game.isCheckmate -> "¡JAQUE MATE! Ganan las ${if (game.winner == PieceColor.WHITE) "Blancas ♔" else "Negras ♚"}"
-                                game.isStalemate -> "¡TABLAS POR AHOGADO! Empate 🤝"
-                                game.isKingInCheck -> "¡JAQUE! ⚠️"
-                                else -> if (game.isVsAi) "Modo: vs Computadora 🤖" else "Modo: 2 Jugadores 👥"
-                            },
-                            style = MaterialTheme.typography.titleMedium,
-                            color = if (game.isCheckmate || game.isStalemate || game.isKingInCheck) Color.White else Color(0xFFD2B48C),
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = if (game.isCheckmate || game.isStalemate) "Fin del juego" else "Turno: ${if (game.currentTurn == PieceColor.WHITE) "Blancas ♔" else "Negras ♚"}",
+                            text = if (game.isCheckmate || game.isStalemate || game.isDrawByRepetition) "Fin del juego" else "Turno: ${if (game.currentTurn == PieceColor.WHITE) "Blancas ♔" else "Negras ♚"}",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = Color.White

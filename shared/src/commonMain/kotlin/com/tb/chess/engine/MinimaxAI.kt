@@ -2,6 +2,7 @@ package com.tb.chess.engine
 
 import com.tb.chess.engine.evaluator.ChessEvaluator
 import com.tb.chess.model.*
+import com.tb.chess.model.movements.MoveValidator
 import kotlin.math.max
 import kotlin.math.min
 

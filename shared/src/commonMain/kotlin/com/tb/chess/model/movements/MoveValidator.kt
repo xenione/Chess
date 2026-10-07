@@ -1,8 +1,18 @@
-package com.tb.chess.model
+package com.tb.chess.model.movements
 
+import com.tb.chess.model.ChessBoard
+import com.tb.chess.model.ChessPiece
+import com.tb.chess.model.MoveResult
+import com.tb.chess.model.PieceColor
+import com.tb.chess.model.PieceType
+import com.tb.chess.model.Position
 import kotlin.math.abs
 
 object MoveValidator {
+
+    fun addMoveRule(pieceType: PieceType, moveRule: MoveRule){
+
+    }
 
     fun isLegalMove(board: ChessBoard, from: Position, to: Position): Boolean {
         if (from == to) return false
@@ -24,23 +34,27 @@ object MoveValidator {
         return when (piece.type) {
             PieceType.PAWN -> isValidPawnMove(board, from, to, piece.color)
             PieceType.KNIGHT -> {
-                if(!piece.isIntrinsicalMoveValid(from, to)) return false
+                if (!piece.isIntrinsicalMoveValid(from, to)) return false
                 true
             }
+
             PieceType.BISHOP -> {
-                if(!piece.isIntrinsicalMoveValid(from, to)) return false
-                isPathClear(board, from, to)
+                if (!piece.isIntrinsicalMoveValid(from, to)) return false
+                board.isPathClear(from, to)
             }
-            PieceType.ROOK ->   {
-                if(!piece.isIntrinsicalMoveValid(from, to)) return false
-                isPathClear(board, from, to)
+
+            PieceType.ROOK -> {
+                if (!piece.isIntrinsicalMoveValid(from, to)) return false
+                board.isPathClear(from, to)
             }
+
             PieceType.QUEEN -> {
-                if(!piece.isIntrinsicalMoveValid(from, to)) return false
-                isPathClear(board, from, to)
+                if (!piece.isIntrinsicalMoveValid(from, to)) return false
+                board.isPathClear(from, to)
             }
-            PieceType.KING ->   {
-                if(!piece.isIntrinsicalMoveValid(from, to)) return false
+
+            PieceType.KING -> {
+                if (!piece.isIntrinsicalMoveValid(from, to)) return false
                 true
             }
         }
@@ -87,21 +101,12 @@ object MoveValidator {
         return false
     }
 
-    private fun canPieceAttack(board: ChessBoard, from: Position, to: Position, piece: ChessPiece): Boolean {
-        //returbn piece.canBeAttack(from, to) // es necesario aplicar isClearPath
-        return when (piece.type) {
-            PieceType.PAWN -> {
-                val direction = if (piece.color == PieceColor.WHITE) -1 else 1
-                val rowDiff = to.row - from.row
-                val colDiff = abs(to.col - from.col)
-                colDiff == 1 && rowDiff == direction
-            }
-            PieceType.KNIGHT -> isValidKnightMove(from, to)
-            PieceType.BISHOP -> isValidBishopMove(board, from, to)
-            PieceType.ROOK -> isValidRookMove(board, from, to)
-            PieceType.QUEEN -> isValidQueenMove(board, from, to)
-            PieceType.KING -> isValidKingMove(from, to)
-        }
+    private fun canPieceAttack(
+        board: ChessBoard, from: Position, to: Position, piece: ChessPiece
+    ): Boolean {
+        if (!piece.canBeAttack(from, to)) return false
+        if (piece.type == PieceType.KNIGHT) return true
+        return board.isPathClear(from, to)
     }
 
     fun hasAnyLegalMoves(board: ChessBoard, color: PieceColor): Boolean {
@@ -156,6 +161,8 @@ object MoveValidator {
         val rowDiff = to.row - from.row
         val colDiff = to.col - from.col
 
+       //board.isPathClear(from, to)
+
         // Forward move 1 square
         if (colDiff == 0 && rowDiff == direction && board.getPiece(to) == null) { //  TODO board.getPiece(to) == null equivale a isPathClear
             return true
@@ -183,61 +190,5 @@ object MoveValidator {
         }
 
         return false
-    }
-
-    private fun isValidKnightMove(from: Position, to: Position): Boolean {
-        val rowDiff = abs(to.row - from.row)
-        val colDiff = abs(to.col - from.col)
-        return (rowDiff == 2 && colDiff == 1) || (rowDiff == 1 && colDiff == 2)
-    }
-
-    private fun isValidBishopMove(board: ChessBoard, from: Position, to: Position): Boolean {
-        val rowDiff = to.row - from.row
-        val colDiff = to.col - from.col
-        if (abs(rowDiff) != abs(colDiff)) return false
-
-        return isPathClear(board, from, to)
-    }
-
-    private fun isValidRookMove(board: ChessBoard, from: Position, to: Position): Boolean {
-        val rowDiff = to.row - from.row
-        val colDiff = to.col - from.col
-        if (rowDiff != 0 && colDiff != 0) return false
-
-        return isPathClear(board, from, to)
-    }
-
-    private fun isValidQueenMove(board: ChessBoard, from: Position, to: Position): Boolean {
-        val rowDiff = to.row - from.row
-        val colDiff = to.col - from.col
-        val isDiagonal = abs(rowDiff) == abs(colDiff)
-        val isStraight = rowDiff == 0 || colDiff == 0
-        if (!isDiagonal && !isStraight) return false
-
-        return isPathClear(board, from, to)
-    }
-
-    private fun isValidKingMove(from: Position, to: Position): Boolean {
-        val rowDiff = abs(to.row - from.row)
-        val colDiff = abs(to.col - from.col)
-        return rowDiff <= 1 && colDiff <= 1
-    }
-
-    private fun isPathClear(board: ChessBoard, from: Position, to: Position): Boolean {
-        val rowStep = compareValues(to.row, from.row).let { if (it == 0) 0 else it / abs(it) }
-        val colStep = compareValues(to.col, from.col).let { if (it == 0) 0 else it / abs(it) }
-
-        var currentRow = from.row + rowStep
-        var currentCol = from.col + colStep
-
-        while (currentRow != to.row || currentCol != to.col) {
-            if (board.getPiece(Position(currentRow, currentCol)) != null) {
-                return false
-            }
-            currentRow += rowStep
-            currentCol += colStep
-        }
-
-        return true
     }
 }

@@ -111,6 +111,33 @@ class ChessBoard(
         )
     }
 
+
+    fun isPathClear(from: Position, to: Position): Boolean {
+        val rowStep = compareValues(to.row, from.row).let { if (it == 0) 0 else it / abs(it) }
+        val colStep = compareValues(to.col, from.col).let { if (it == 0) 0 else it / abs(it) }
+
+        var currentRow = from.row + rowStep
+        var currentCol = from.col + colStep
+
+        while (currentRow != to.row || currentCol != to.col) {
+            if (this.getPiece(Position(currentRow, currentCol)) != null) {
+                return false
+            }
+            currentRow += rowStep
+            currentCol += colStep
+        }
+
+        return true
+    }
+
+    fun restore(other: ChessBoard) {
+        squares.clear()
+        squares.putAll(other.squares)
+        piecesHasBeenMoved.clear()
+        piecesHasBeenMoved.addAll(other.piecesHasBeenMoved)
+        enPassantTarget = other.enPassantTarget
+    }
+
     private fun hasBeenMoved(piece: ChessPiece): Boolean = piecesHasBeenMoved.contains(piece)
 
     private fun markAsMoved(piece: ChessPiece) {
