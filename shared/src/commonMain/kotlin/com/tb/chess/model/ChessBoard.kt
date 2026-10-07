@@ -29,6 +29,24 @@ class ChessBoard(
         return PiecePositionState(position, piece, hasBeenMoved(piece))
     }
 
+    fun isSquareAttacked(square: Position, attackerColor: PieceColor): Boolean {
+        val pieces = this.getAllPiecesState(attackerColor)
+        for (pieceState in pieces) {
+            if (canPieceAttack(pieceState.position, square, pieceState.piece)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    private fun canPieceAttack(
+        from: Position, to: Position, piece: ChessPiece
+    ): Boolean {
+        if (!piece.canBeAttack(from, to)) return false
+        if (piece.type == PieceType.KNIGHT) return true
+        return this.isPathClear(from, to)
+    }
+
     fun getAllPiecesState(): List<PiecePositionState> =
         squares.map { (position, piece) ->
             PiecePositionState(

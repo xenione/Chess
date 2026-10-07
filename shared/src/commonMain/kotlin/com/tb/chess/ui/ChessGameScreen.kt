@@ -449,9 +449,14 @@ fun ChessGameScreen() {
                         style = MaterialTheme.typography.bodySmall,
                         color = Color(0xFFD2B48C),
                         fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(bottom = 12.dp)
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
 
+                    CapturedPiecesRow(title = "Capturadas por Blancas ♔", capturedPieces = game.capturedByWhite)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    CapturedPiecesRow(title = "Capturadas por Negras ♚", capturedPieces = game.capturedByBlack)
+
+                    Spacer(modifier = Modifier.height(8.dp))
                     HorizontalDivider(color = Color.Gray, thickness = 0.5.dp)
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -539,6 +544,53 @@ fun ChessGameScreen() {
         if (promo != null) {
             PromotionDialog(color = promo.color) { selectedType ->
                 game.promotePawn(selectedType)
+            }
+        }
+    }
+}
+
+@Composable
+fun CapturedPiecesRow(title: String, capturedPieces: List<ChessPiece>) {
+    if (capturedPieces.isEmpty()) return
+    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodySmall,
+            color = Color(0xFFD2B48C),
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val pawns = capturedPieces.filter { it.type == PieceType.PAWN }
+            val others = capturedPieces.filter { it.type != PieceType.PAWN }
+
+            if (pawns.isNotEmpty()) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                    val samplePawn = pawns.first()
+                    Image(
+                        painter = painterResource(samplePawn.drawableResource()),
+                        contentDescription = "Pawn",
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(
+                        text = "x${pawns.size}",
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            for (piece in others) {
+                Image(
+                    painter = painterResource(piece.drawableResource()),
+                    contentDescription = "${piece.type}",
+                    modifier = Modifier.size(24.dp)
+                )
             }
         }
     }

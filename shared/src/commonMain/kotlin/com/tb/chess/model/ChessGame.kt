@@ -7,7 +7,7 @@ import com.tb.chess.engine.evaluator.ChessEvaluator
 import com.tb.chess.engine.MinimaxAI
 import com.tb.chess.engine.OpeningBook
 import com.tb.chess.engine.OpeningDetector
-import com.tb.chess.model.movements.MoveValidator
+import com.tb.chess.model.movements.rules.MoveValidator
 import kotlinx.coroutines.*
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -35,7 +35,9 @@ data class GameStateSnapshot(
     val isDrawByRepetition: Boolean,
     val winner: PieceColor?,
     val pendingPromotion: PromotionState?,
-    val boardStateHistory: Map<String, Int>
+    val boardStateHistory: Map<String, Int>,
+    val capturedByWhite: List<ChessPiece>,
+    val capturedByBlack: List<ChessPiece>
 )
 
 class ChessGame(
@@ -43,6 +45,7 @@ class ChessGame(
     private val ai: MinimaxAI
 ) {
     val board = ChessBoard()
+    private val moveValidator = MoveValidator(board)
 
     var currentTurn by mutableStateOf(PieceColor.WHITE)
         private set
@@ -74,6 +77,12 @@ class ChessGame(
     var isDrawByRepetition by mutableStateOf(false)
         private set
 
+    var capturedByWhite by mutableStateOf<List<ChessPiece>>(emptyList())
+        private set
+
+    var capturedByBlack by mutableStateOf<List<ChessPiece>>(emptyList())
+        private set
+
     private val undoStack = mutableListOf<GameStateSnapshot>()
 
     val canUndo: Boolean
@@ -92,7 +101,9 @@ class ChessGame(
                 isDrawByRepetition = isDrawByRepetition,
                 winner = winner,
                 pendingPromotion = pendingPromotion,
-                boardStateHistory = boardStateHistory.toMap()
+                boardStateHistory = boardStateHistory.toMap(),
+                capturedByWhite = capturedByWhite.toList(),
+                capturedByBlack = capturedByBlack.toList()
             )
         )
     }
@@ -112,6 +123,8 @@ class ChessGame(
         pendingPromotion = snapshot.pendingPromotion
         boardStateHistory.clear()
         boardStateHistory.putAll(snapshot.boardStateHistory)
+        capturedByWhite = snapshot.capturedByWhite
+        capturedByBlack = snapshot.capturedByBlack
         selectedPosition = null
         boardVersion++
     }
@@ -161,7 +174,7 @@ class ChessGame(
     val isKingInCheck: Boolean
         get() {
             val v = boardVersion
-            return MoveValidator.isKingInCheck(board, currentTurn)
+            return moveValidator.isKingInCheck(board, currentTurn)
         }
 
     val currentOpening: String
@@ -175,7 +188,7 @@ class ChessGame(
     val currentLegalMoves: List<Position>
         get() {
             val selected = selectedPosition ?: return emptyList()
-            return MoveValidator.getLegalMoves(board, selected)
+            return moveValidator.getLegalMoves(board, selected)
         }
 
     val evaluationCentipawns: Int
@@ -211,7 +224,7 @@ class ChessGame(
                     selectedPosition = position
                 } else {
                     // Validate move with isCompletelyLegalMove (ensures king not left in check)
-                    if (MoveValidator.isCompletelyLegalMove(board, selected, position)) {
+                    if (moveValidator.isCompletelyLegalMove(board, selected, position)) {
                         val piece = board.getPiece(selected)
                         
                         // Check for pawn promotion
@@ -224,8 +237,16 @@ class ChessGame(
                             selectedPosition = null
                         } else {
                             saveSnapshot()
+                            val capturingColor = currentTurn
                             val result = board.movePiece(selected, position)
                             if (result is MoveResult.Success && piece != null) {
+                                if (result.capturedPiece != null) {
+                                    if (capturingColor == PieceColor.WHITE) {
+                                        capturedByWhite = capturedByWhite + result.capturedPiece
+                                    } else {
+                                        capturedByBlack = capturedByBlack + result.capturedPiece
+                                    }
+                                }
                                 lastMoveFrom = selected
                                 lastMoveTo = position
                                 moveHistory = moveHistory + MoveRecord(piece, selected, position, currentTurn == PieceColor.WHITE)
@@ -250,8 +271,16 @@ class ChessGame(
     fun promotePawn(selectedType: PieceType) {
         val promo = pendingPromotion ?: return
         saveSnapshot()
+        val capturingColor = currentTurn
         val result = board.movePiece(promo.from, promo.to)
         if (result is MoveResult.Success) {
+            if (result.capturedPiece != null) {
+                if (capturingColor == PieceColor.WHITE) {
+                    capturedByWhite = capturedByWhite + result.capturedPiece
+                } else {
+                    capturedByBlack = capturedByBlack + result.capturedPiece
+                }
+            }
             val promotedPiece = ChessPiece(promo.to, selectedType, promo.color)
             board.setPiece(promo.to, promotedPiece)
 
@@ -273,9 +302,9 @@ class ChessGame(
 
     private fun checkGameStatus() {
         if (isDrawByRepetition) return
-        val hasMoves = MoveValidator.hasAnyLegalMoves(board, currentTurn)
+        val hasMoves = moveValidator.hasAnyLegalMoves(board, currentTurn)
         if (!hasMoves) {
-            if (MoveValidator.isKingInCheck(board, currentTurn)) {
+            if (moveValidator.isKingInCheck(board, currentTurn)) {
                 isCheckmate = true
                 winner = currentTurn.opposite()
             } else {
@@ -295,12 +324,20 @@ class ChessGame(
             }
 
             if (bestMove != null && currentTurn == PieceColor.BLACK && !isCheckmate && !isStalemate && !isDrawByRepetition && pendingPromotion == null) {
-                if (MoveValidator.isCompletelyLegalMove(board, bestMove.first, bestMove.second)) {
+                if (moveValidator.isCompletelyLegalMove(board, bestMove.first, bestMove.second)) {
                     val piece = board.getPiece(bestMove.first)
                     val isPromotion = piece?.type == PieceType.PAWN && bestMove.second.row == 7
 
+                    val capturingColor = currentTurn
                     val result = board.movePiece(bestMove.first, bestMove.second)
                     if (result is MoveResult.Success && piece != null) {
+                        if (result.capturedPiece != null) {
+                            if (capturingColor == PieceColor.WHITE) {
+                                capturedByWhite = capturedByWhite + result.capturedPiece
+                            } else {
+                                capturedByBlack = capturedByBlack + result.capturedPiece
+                            }
+                        }
                         val finalPiece = if (isPromotion) {
                             val queen = ChessPiece(bestMove.second, PieceType.QUEEN, PieceColor.BLACK)
                             board.setPiece(bestMove.second, queen)
@@ -335,6 +372,8 @@ class ChessGame(
         isDrawByRepetition = false
         winner = null
         pendingPromotion = null
+        capturedByWhite = emptyList()
+        capturedByBlack = emptyList()
         undoStack.clear()
         boardVersion++
         recordInitialState()

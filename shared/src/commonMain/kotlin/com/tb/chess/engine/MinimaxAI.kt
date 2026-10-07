@@ -2,7 +2,7 @@ package com.tb.chess.engine
 
 import com.tb.chess.engine.evaluator.ChessEvaluator
 import com.tb.chess.model.*
-import com.tb.chess.model.movements.MoveValidator
+import com.tb.chess.model.movements.rules.MoveValidator
 import kotlin.math.max
 import kotlin.math.min
 
@@ -49,21 +49,22 @@ class MinimaxAI(
         var alpha = alphaParam
         var beta = betaParam
 
-        if (depth == 0) {
-            return chessEvaluator.evaluate(board, aiColor)
-        }
-
         val currentColor = if (isMaximizing) aiColor else aiColor.opposite()
+        val moveValidator = MoveValidator(board)
         val allMoves = getAllPossibleMoves(board, currentColor)
 
         if (allMoves.isEmpty()) {
-            val inCheck = MoveValidator.isKingInCheck(board, currentColor)
+            val inCheck = moveValidator.isKingInCheck(board, currentColor)
             if (inCheck) {
                 return if (isMaximizing) -15000 + depth else 15000 - depth
             } else {
                 val materialEval = chessEvaluator.evaluate(board, aiColor)
                 return if (materialEval > 200) -10000 else 0
             }
+        }
+
+        if (depth == 0) {
+            return chessEvaluator.evaluate(board, aiColor)
         }
 
         if (isMaximizing) {
@@ -98,8 +99,9 @@ class MinimaxAI(
     private fun getAllPossibleMoves(board: ChessBoard, color: PieceColor): List<ScoredMove> {
         val moves = mutableListOf<ScoredMove>()
         val pieces = board.getAllPiecesState(color)
+        val moveValidator = MoveValidator(board)
         for (pieceState in pieces) {
-            val legalTargets = MoveValidator.getLegalMoves(board, pieceState.position)
+            val legalTargets = moveValidator.getLegalMoves(board, pieceState.position)
             for (to in legalTargets) {
                 val targetPiece = board.getPiece(to)
                 val captureBonus = when (targetPiece?.type) {

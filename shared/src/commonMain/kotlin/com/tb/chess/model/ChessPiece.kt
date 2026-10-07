@@ -9,18 +9,22 @@ data class ChessPiece(
     val color: PieceColor,
 ) {
 
-    fun isIntrinsicalMoveValid(from: Position, to: Position): Boolean {
-        val rPosition = if (color == PieceColor.WHITE)
+    fun isInitialPosition(position: Position): Boolean {
+        return initialPosition == position
+    }
+
+    fun relativePosition(from: Position, to: Position): RelativePosition {
+        return if (color == PieceColor.WHITE)
             RelativePosition.position(to, from)
         else RelativePosition.position(from, to)
-        return type.isIntrinsicalMoveValid(rPosition)
+    }
+
+    fun isIntrinsicalMoveValid(from: Position, to: Position): Boolean {
+        return type.isIntrinsicalMoveValid(relativePosition(from, to))
     }
 
     fun canBeAttack(from: Position, to: Position): Boolean {
-        val rPosition = if (color == PieceColor.WHITE)
-            RelativePosition.position(to, from)
-        else RelativePosition.position(from, to)
-        return type.canBeAttack(rPosition)
+        return type.canBeAttack(relativePosition(from, to))
     }
 
     val symbol: Char
