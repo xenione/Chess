@@ -118,6 +118,43 @@ class MoveValidatorTest {
         assertFalse(moveValidator.isCompletelyLegalMove(board, e2, f3), "Pawn cannot capture friendly piece")
     }
 
+    @Test
+    fun testPawnEnPassantCaptureIsLegal() {
+        val board = createEmptyBoard()
+        val moveValidator = MoveValidator(board)
+
+        val e1 = Position('e', 1) // White King
+        val e8 = Position('e', 8) // Black King
+        val d5 = Position('d', 5) // White Pawn
+        val e5 = Position('e', 5) // Black Pawn that just moved two squares
+        val e6 = Position('e', 6) // En Passant target square
+
+        board.setPiece(e1, ChessPiece(e1, PieceType.KING, PieceColor.WHITE))
+        board.setPiece(e8, ChessPiece(e8, PieceType.KING, PieceColor.BLACK))
+        board.setPiece(d5, ChessPiece(d5, PieceType.PAWN, PieceColor.WHITE))
+        board.setPiece(e5, ChessPiece(e5, PieceType.PAWN, PieceColor.BLACK))
+        board.enPassantTarget = e6
+
+        assertTrue(moveValidator.isCompletelyLegalMove(board, d5, e6), "White pawn should be able to capture en passant at e6")
+    }
+
+    @Test
+    fun testPinnedPawnMoveLeavingKingInCheckIsIllegal() {
+        val board = createEmptyBoard()
+        val moveValidator = MoveValidator(board)
+
+        val e1 = Position('e', 1) // White King
+        val f2 = Position('f', 2) // White Pawn pinned on the h4-e1 diagonal
+        val h4 = Position('h', 4) // Black Bishop checking king if f2 moves
+        val f3 = Position('f', 3)
+
+        board.setPiece(e1, ChessPiece(e1, PieceType.KING, PieceColor.WHITE))
+        board.setPiece(f2, ChessPiece(f2, PieceType.PAWN, PieceColor.WHITE))
+        board.setPiece(h4, ChessPiece(h4, PieceType.BISHOP, PieceColor.BLACK))
+
+        assertFalse(moveValidator.isCompletelyLegalMove(board, f2, f3), "Moving a pinned pawn off its diagonal should be illegal as it leaves king in check")
+    }
+
     // --- KNIGHT TESTS ---
 
     @Test

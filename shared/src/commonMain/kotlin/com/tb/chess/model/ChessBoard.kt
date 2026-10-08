@@ -156,7 +156,7 @@ class ChessBoard(
         enPassantTarget = other.enPassantTarget
     }
 
-    private fun hasBeenMoved(piece: ChessPiece): Boolean = piecesHasBeenMoved.contains(piece)
+     fun hasBeenMoved(piece: ChessPiece): Boolean = piecesHasBeenMoved.contains(piece)
 
     private fun markAsMoved(piece: ChessPiece) {
         piecesHasBeenMoved.add(piece)

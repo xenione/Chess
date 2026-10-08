@@ -3,7 +3,7 @@ package com.tb.chess.model.movements.rules
 import com.tb.chess.model.ChessPiece
 import com.tb.chess.model.Position
 
-fun interface MoveRule : Rule {
+fun interface Rule {
 
-    override fun isValid(piece: ChessPiece, from: Position, to: Position): Boolean
+    fun isValid(piece: ChessPiece, from: Position, to: Position): Boolean
 }

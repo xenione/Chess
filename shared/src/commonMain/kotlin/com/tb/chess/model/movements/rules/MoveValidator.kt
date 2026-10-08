@@ -24,10 +24,11 @@ class MoveValidator(board: ChessBoard) {
             return isValidCastling(board, from, to)
         }
 
-        ChessRuleProvider(board).provide(piece.type).isValid(piece, from, to)
 
         return when (piece.type) {
-            PieceType.PAWN -> isValidPawnMove(board, from, to, piece.color)
+            PieceType.PAWN -> {
+                ChessRuleProvider(board).provide(piece.type).isValid(piece, from, to)
+            }
             PieceType.KNIGHT -> {
                 ChessRuleProvider(board).provide(piece.type).isValid(piece, from, to)
             }

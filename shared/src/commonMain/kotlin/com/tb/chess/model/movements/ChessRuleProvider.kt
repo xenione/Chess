@@ -4,9 +4,18 @@ import com.tb.chess.model.ChessBoard
 import com.tb.chess.model.PieceType
 import com.tb.chess.model.movements.rules.AndRule
 import com.tb.chess.model.movements.rules.BlockPathMoveRule
+import com.tb.chess.model.movements.rules.ChessRule
+import com.tb.chess.model.movements.rules.ChessRule.Case.CaseBuilder
+import com.tb.chess.model.movements.rules.EnPassantMoveRule
+import com.tb.chess.model.movements.rules.HasNotBeenMoveMoveRule
 import com.tb.chess.model.movements.rules.IntrinsicMoveRule
-import com.tb.chess.model.movements.rules.MoveRule
+import com.tb.chess.model.movements.rules.NSquareForwardDiagonalMoveRule
+import com.tb.chess.model.movements.rules.NSquareForwardMoveRule
+import com.tb.chess.model.movements.rules.OrRule
+import com.tb.chess.model.movements.rules.Rule
 import com.tb.chess.model.movements.rules.TargetNotOccupiedByFriendlyPieceMoveRule
+import com.tb.chess.model.movements.rules.TargetNotOccupiedByPieceMoveRule
+import com.tb.chess.model.movements.rules.TargetOccupiedByEnemyPieceMoveRule
 
 class ChessRuleProvider(private val board: ChessBoard) : RuleProvider {
 
@@ -27,9 +36,37 @@ class ChessRuleProvider(private val board: ChessBoard) : RuleProvider {
 
     private val kingMoves = commonMoveRule
 
-    private val pawnMoves = commonMoveRule
+    private val pawnMoves =
+        // movimento intrinseco de una casilla
+        ChessRule.Builder()
+            .case(
+                CaseBuilder()
+                    .move(IntrinsicMoveRule())
+                    .condition(TargetNotOccupiedByPieceMoveRule(board))
+                    .build()
+            )
+            .case(
+                CaseBuilder()
+                    .move(NSquareForwardMoveRule(2))
+                    .condition(TargetNotOccupiedByPieceMoveRule(board))
+                    .condition(HasNotBeenMoveMoveRule(board))
+                    .build()
+            )
+            // captura diagonal
+            .case(
+                CaseBuilder()
+                    .move(NSquareForwardDiagonalMoveRule(1))
+                    .condition(
+                        OrRule.Builder()
+                            .or(TargetOccupiedByEnemyPieceMoveRule(board))
+                            .or(EnPassantMoveRule(board))
+                            .build()
+                    ).build()
+            )
+            .build()
 
-    override fun provide(type: PieceType): MoveRule {
+
+    override fun provide(type: PieceType): Rule {
         return when (type) {
             PieceType.KNIGHT -> knightMoves
             PieceType.BISHOP -> bishopMoves
