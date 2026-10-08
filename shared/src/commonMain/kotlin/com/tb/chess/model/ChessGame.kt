@@ -9,7 +9,6 @@ import com.tb.chess.engine.OpeningBook
 import com.tb.chess.engine.OpeningDetector
 import com.tb.chess.model.movements.rules.MoveValidator
 import kotlinx.coroutines.*
-import kotlin.time.Duration.Companion.milliseconds
 
 data class MoveRecord(
     val piece: ChessPiece,
@@ -316,8 +315,6 @@ class ChessGame(
     private fun makeAiMove() {
         if (isCheckmate || isStalemate || isDrawByRepetition || pendingPromotion != null) return
         coroutineScope.launch {
-            delay(1500.milliseconds)
-
             val bookMove = OpeningBook.getBookMove(moveHistory)
             val bestMove = bookMove ?: withContext(Dispatchers.Default) {
                 ai.findBestMove(board, PieceColor.BLACK)

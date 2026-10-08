@@ -11,7 +11,9 @@ import kotlin.math.abs
 
 class MoveValidator(board: ChessBoard) {
 
-    fun addMoveRule(pieceType: PieceType, moveRule: MoveRule){
+    private val chessRule = ChessRuleProvider(board)
+
+    fun addMoveRule(pieceType: PieceType, moveRule: MoveRule) {
 
     }
 
@@ -24,31 +26,7 @@ class MoveValidator(board: ChessBoard) {
             return isValidCastling(board, from, to)
         }
 
-
-        return when (piece.type) {
-            PieceType.PAWN -> {
-                ChessRuleProvider(board).provide(piece.type).isValid(piece, from, to)
-            }
-            PieceType.KNIGHT -> {
-                ChessRuleProvider(board).provide(piece.type).isValid(piece, from, to)
-            }
-
-            PieceType.BISHOP -> {
-                ChessRuleProvider(board).provide(piece.type).isValid(piece, from, to)
-            }
-
-            PieceType.ROOK -> {
-                ChessRuleProvider(board).provide(piece.type).isValid(piece, from, to)
-            }
-
-            PieceType.QUEEN -> {
-                ChessRuleProvider(board).provide(piece.type).isValid(piece, from, to)
-            }
-
-            PieceType.KING -> {
-                ChessRuleProvider(board).provide(piece.type).isValid(piece, from, to)
-            }
-        }
+        return chessRule.provide(piece.type).isValid(piece, from, to)
     }
 
     fun isCompletelyLegalMove(board: ChessBoard, from: Position, to: Position): Boolean {
@@ -64,7 +42,79 @@ class MoveValidator(board: ChessBoard) {
     }
 
     fun getLegalMoves(board: ChessBoard, from: Position): List<Position> {
-        return board.getAllPositions().filter { to -> isCompletelyLegalMove(board, from, to) }
+        val piece = board.getPiece(from) ?: return emptyList()
+        val candidates = mutableListOf<Position>()
+
+        when (piece.type) {
+            PieceType.PAWN -> {
+                val dir = if (piece.color == PieceColor.WHITE) -1 else 1
+                val r = from.row
+                val c = from.col
+                if (r + dir in 0..7) candidates.add(Position(r + dir, c))
+                val startRow = if (piece.color == PieceColor.WHITE) 6 else 1
+                if (r == startRow) candidates.add(Position(r + 2 * dir, c))
+                if (r + dir in 0..7) {
+                    if (c - 1 in 0..7) candidates.add(Position(r + dir, c - 1))
+                    if (c + 1 in 0..7) candidates.add(Position(r + dir, c + 1))
+                }
+                if (board.enPassantTarget != null && board.enPassantTarget!!.row == r + dir && abs(board.enPassantTarget!!.col - c) == 1) {
+                    candidates.add(board.enPassantTarget!!)
+                }
+            }
+            PieceType.KNIGHT -> {
+                val offsets = listOf(
+                    Pair(-2, -1), Pair(-2, 1), Pair(-1, -2), Pair(-1, 2),
+                    Pair(1, -2), Pair(1, 2), Pair(2, -1), Pair(2, 1)
+                )
+                for (offset in offsets) {
+                    val nr = from.row + offset.first
+                    val nc = from.col + offset.second
+                    if (nr in 0..7 && nc in 0..7) {
+                        candidates.add(Position(nr, nc))
+                    }
+                }
+            }
+            PieceType.KING -> {
+                for (dr in -1..1) {
+                    for (dc in -1..1) {
+                        if (dr != 0 || dc != 0) {
+                            val nr = from.row + dr
+                            val nc = from.col + dc
+                            if (nr in 0..7 && nc in 0..7) {
+                                candidates.add(Position(nr, nc))
+                            }
+                        }
+                    }
+                }
+                if (from.col == 4) {
+                    candidates.add(Position(from.row, from.col + 2))
+                    candidates.add(Position(from.row, from.col - 2))
+                }
+            }
+            PieceType.ROOK, PieceType.BISHOP, PieceType.QUEEN -> {
+                val directions = mutableListOf<Pair<Int, Int>>()
+                if (piece.type == PieceType.ROOK || piece.type == PieceType.QUEEN) {
+                    directions.addAll(listOf(Pair(-1, 0), Pair(1, 0), Pair(0, -1), Pair(0, 1)))
+                }
+                if (piece.type == PieceType.BISHOP || piece.type == PieceType.QUEEN) {
+                    directions.addAll(listOf(Pair(-1, -1), Pair(-1, 1), Pair(1, -1), Pair(1, 1)))
+                }
+                for (dir in directions) {
+                    var step = 1
+                    while (true) {
+                        val nr = from.row + dir.first * step
+                        val nc = from.col + dir.second * step
+                        if (nr !in 0..7 || nc !in 0..7) break
+                        val pos = Position(nr, nc)
+                        candidates.add(pos)
+                        if (board.getPiece(pos) != null) break
+                        step++
+                    }
+                }
+            }
+        }
+
+        return candidates.filter { to -> isCompletelyLegalMove(board, from, to) }
     }
 
     fun isKingInCheck(board: ChessBoard, pieceState: PiecePositionState): Boolean {
