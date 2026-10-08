@@ -223,7 +223,7 @@ class ChessGame(
                     selectedPosition = position
                 } else {
                     // Validate move with isCompletelyLegalMove (ensures king not left in check)
-                    if (moveValidator.isCompletelyLegalMove(board, selected, position)) {
+                    if (moveValidator.isLegalMove(board, selected, position)) {
                         val piece = board.getPiece(selected)
                         
                         // Check for pawn promotion
@@ -321,7 +321,7 @@ class ChessGame(
             }
 
             if (bestMove != null && currentTurn == PieceColor.BLACK && !isCheckmate && !isStalemate && !isDrawByRepetition && pendingPromotion == null) {
-                if (moveValidator.isCompletelyLegalMove(board, bestMove.first, bestMove.second)) {
+                if (moveValidator.isLegalMove(board, bestMove.first, bestMove.second)) {
                     val piece = board.getPiece(bestMove.first)
                     val isPromotion = piece?.type == PieceType.PAWN && bestMove.second.row == 7
 

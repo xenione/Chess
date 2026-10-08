@@ -4,9 +4,9 @@ import com.tb.chess.model.ChessBoard
 import com.tb.chess.model.ChessPiece
 import com.tb.chess.model.Position
 
-class BlockPathMoveRule(private val board: ChessBoard) : MoveRule {
+class IsFromPositionUnderAttackMoveRule(private val board: ChessBoard) : Rule {
 
     override fun isValid(piece: ChessPiece, from: Position, to: Position): Boolean {
-        return board.isPathClear(from, to)
+        return board.isSquareAttacked(from, piece.color.opposite())
     }
 }

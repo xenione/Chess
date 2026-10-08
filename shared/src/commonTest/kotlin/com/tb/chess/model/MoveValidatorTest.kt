@@ -24,7 +24,7 @@ class MoveValidatorTest {
 
         val e2 = Position('e', 2)
         val e3 = Position('e', 3)
-        assertTrue(moveValidator.isCompletelyLegalMove(board, e2, e3))
+        assertTrue(moveValidator.isLegalMove(board, e2, e3))
     }
 
     @Test
@@ -34,7 +34,7 @@ class MoveValidatorTest {
 
         val e2 = Position('e', 2)
         val e4 = Position('e', 4)
-        assertTrue(moveValidator.isCompletelyLegalMove(board, e2, e4))
+        assertTrue(moveValidator.isLegalMove(board, e2, e4))
     }
 
     @Test
@@ -44,7 +44,7 @@ class MoveValidatorTest {
 
         val e2 = Position('e', 2)
         val e5 = Position('e', 5)
-        assertFalse(moveValidator.isCompletelyLegalMove(board, e2, e5))
+        assertFalse(moveValidator.isLegalMove(board, e2, e5))
     }
 
     @Test
@@ -62,7 +62,7 @@ class MoveValidatorTest {
         board.setPiece(e2, ChessPiece(e2, PieceType.PAWN, PieceColor.WHITE))
         board.setPiece(e3, ChessPiece(e3, PieceType.KNIGHT, PieceColor.BLACK))
 
-        assertFalse(moveValidator.isCompletelyLegalMove(board, e2, e3), "Pawn cannot move forward into occupied square")
+        assertFalse(moveValidator.isLegalMove(board, e2, e3), "Pawn cannot move forward into occupied square")
     }
 
     @Test
@@ -80,7 +80,7 @@ class MoveValidatorTest {
         board.setPiece(e2, ChessPiece(e2, PieceType.PAWN, PieceColor.WHITE))
         board.setPiece(d3, ChessPiece(d3, PieceType.PAWN, PieceColor.BLACK))
 
-        assertTrue(moveValidator.isCompletelyLegalMove(board, e2, d3), "Pawn should be able to capture enemy diagonally")
+        assertTrue(moveValidator.isLegalMove(board, e2, d3), "Pawn should be able to capture enemy diagonally")
     }
 
     @Test
@@ -97,7 +97,7 @@ class MoveValidatorTest {
         board.setPiece(e8, ChessPiece(e8, PieceType.KING, PieceColor.BLACK))
         board.setPiece(e2, ChessPiece(e2, PieceType.PAWN, PieceColor.WHITE))
 
-        assertFalse(moveValidator.isCompletelyLegalMove(board, e2, d3), "Pawn cannot move diagonally without capturing")
+        assertFalse(moveValidator.isLegalMove(board, e2, d3), "Pawn cannot move diagonally without capturing")
     }
 
     @Test
@@ -115,7 +115,7 @@ class MoveValidatorTest {
         board.setPiece(e2, ChessPiece(e2, PieceType.PAWN, PieceColor.WHITE))
         board.setPiece(f3, ChessPiece(f3, PieceType.PAWN, PieceColor.WHITE))
 
-        assertFalse(moveValidator.isCompletelyLegalMove(board, e2, f3), "Pawn cannot capture friendly piece")
+        assertFalse(moveValidator.isLegalMove(board, e2, f3), "Pawn cannot capture friendly piece")
     }
 
     @Test
@@ -135,7 +135,7 @@ class MoveValidatorTest {
         board.setPiece(e5, ChessPiece(e5, PieceType.PAWN, PieceColor.BLACK))
         board.enPassantTarget = e6
 
-        assertTrue(moveValidator.isCompletelyLegalMove(board, d5, e6), "White pawn should be able to capture en passant at e6")
+        assertTrue(moveValidator.isLegalMove(board, d5, e6), "White pawn should be able to capture en passant at e6")
     }
 
     @Test
@@ -152,7 +152,7 @@ class MoveValidatorTest {
         board.setPiece(f2, ChessPiece(f2, PieceType.PAWN, PieceColor.WHITE))
         board.setPiece(h4, ChessPiece(h4, PieceType.BISHOP, PieceColor.BLACK))
 
-        assertFalse(moveValidator.isCompletelyLegalMove(board, f2, f3), "Moving a pinned pawn off its diagonal should be illegal as it leaves king in check")
+        assertFalse(moveValidator.isLegalMove(board, f2, f3), "Moving a pinned pawn off its diagonal should be illegal as it leaves king in check")
     }
 
     // --- KNIGHT TESTS ---
@@ -164,7 +164,7 @@ class MoveValidatorTest {
 
         val b1 = Position('b', 1)
         val c3 = Position('c', 3)
-        assertTrue(moveValidator.isCompletelyLegalMove(board, b1, c3))
+        assertTrue(moveValidator.isLegalMove(board, b1, c3))
     }
 
     @Test
@@ -174,7 +174,7 @@ class MoveValidatorTest {
 
         val b1 = Position('b', 1)
         val b3 = Position('b', 3)
-        assertFalse(moveValidator.isCompletelyLegalMove(board, b1, b3))
+        assertFalse(moveValidator.isLegalMove(board, b1, b3))
     }
 
     @Test
@@ -192,7 +192,7 @@ class MoveValidatorTest {
         board.setPiece(b1, ChessPiece(b1, PieceType.KNIGHT, PieceColor.WHITE))
         board.setPiece(c3, ChessPiece(c3, PieceType.PAWN, PieceColor.WHITE))
 
-        assertFalse(moveValidator.isCompletelyLegalMove(board, b1, c3), "Knight cannot land on friendly piece")
+        assertFalse(moveValidator.isLegalMove(board, b1, c3), "Knight cannot land on friendly piece")
     }
 
     // --- BISHOP TESTS ---
@@ -211,7 +211,7 @@ class MoveValidatorTest {
         board.setPiece(e8, ChessPiece(e8, PieceType.KING, PieceColor.BLACK))
         board.setPiece(c1, ChessPiece(c1, PieceType.BISHOP, PieceColor.WHITE))
 
-        assertTrue(moveValidator.isCompletelyLegalMove(board, c1, d2))
+        assertTrue(moveValidator.isLegalMove(board, c1, d2))
     }
 
     @Test
@@ -230,7 +230,7 @@ class MoveValidatorTest {
         board.setPiece(c1, ChessPiece(c1, PieceType.BISHOP, PieceColor.WHITE))
         board.setPiece(d2, ChessPiece(d2, PieceType.PAWN, PieceColor.WHITE))
 
-        assertFalse(moveValidator.isCompletelyLegalMove(board, c1, e3), "Bishop cannot jump over piece at d2")
+        assertFalse(moveValidator.isLegalMove(board, c1, e3), "Bishop cannot jump over piece at d2")
     }
 
     // --- ROOK TESTS ---
@@ -249,7 +249,7 @@ class MoveValidatorTest {
         board.setPiece(e8, ChessPiece(e8, PieceType.KING, PieceColor.BLACK))
         board.setPiece(a1, ChessPiece(a1, PieceType.ROOK, PieceColor.WHITE))
 
-        assertTrue(moveValidator.isCompletelyLegalMove(board, a1, a5))
+        assertTrue(moveValidator.isLegalMove(board, a1, a5))
     }
 
     @Test
@@ -267,7 +267,7 @@ class MoveValidatorTest {
         board.setPiece(a1, ChessPiece(a1, PieceType.ROOK, PieceColor.WHITE))
         board.setPiece(a8, ChessPiece(a8, PieceType.ROOK, PieceColor.BLACK))
 
-        assertTrue(moveValidator.isCompletelyLegalMove(board, a1, a8), "Rook should be able to capture enemy at a8")
+        assertTrue(moveValidator.isLegalMove(board, a1, a8), "Rook should be able to capture enemy at a8")
     }
 
     @Test
@@ -286,7 +286,7 @@ class MoveValidatorTest {
         board.setPiece(a1, ChessPiece(a1, PieceType.ROOK, PieceColor.WHITE))
         board.setPiece(a3, ChessPiece(a3, PieceType.PAWN, PieceColor.WHITE))
 
-        assertFalse(moveValidator.isCompletelyLegalMove(board, a1, a5), "Rook cannot jump over obstacle")
+        assertFalse(moveValidator.isLegalMove(board, a1, a5), "Rook cannot jump over obstacle")
     }
 
     // --- QUEEN TESTS ---
@@ -306,8 +306,8 @@ class MoveValidatorTest {
         board.setPiece(e8, ChessPiece(e8, PieceType.KING, PieceColor.BLACK))
         board.setPiece(d1, ChessPiece(d1, PieceType.QUEEN, PieceColor.WHITE))
 
-        assertTrue(moveValidator.isCompletelyLegalMove(board, d1, d5))
-        assertTrue(moveValidator.isCompletelyLegalMove(board, d1, h5))
+        assertTrue(moveValidator.isLegalMove(board, d1, d5))
+        assertTrue(moveValidator.isLegalMove(board, d1, h5))
     }
 
     // --- KING, CHECK & PIN TESTS ---
@@ -324,7 +324,7 @@ class MoveValidatorTest {
         board.setPiece(d8, ChessPiece(d8, PieceType.ROOK, PieceColor.BLACK))
 
         // d1 is attacked by the rook on d8
-        assertFalse(moveValidator.isCompletelyLegalMove(board, e1, d1))
+        assertFalse(moveValidator.isLegalMove(board, e1, d1))
     }
 
     @Test
@@ -339,7 +339,7 @@ class MoveValidatorTest {
         board.setPiece(d8, ChessPiece(d8, PieceType.ROOK, PieceColor.BLACK))
 
         // f1 is unattacked and safe for King
-        assertTrue(moveValidator.isCompletelyLegalMove(board, e1, f1))
+        assertTrue(moveValidator.isLegalMove(board, e1, f1))
     }
 
     @Test
@@ -374,8 +374,142 @@ class MoveValidatorTest {
 
         // White King at e1 is in check from Black Rook at e8.
         // White Pawn at a2 cannot block or capture the rook on e8, so moving a2 should be illegal.
-        assertFalse(moveValidator.isCompletelyLegalMove(board, a2, a3), "Moving unrelated pawn when in check should be illegal")
+        assertFalse(moveValidator.isLegalMove(board, a2, a3), "Moving unrelated pawn when in check should be illegal")
         val legalMovesForPawn = moveValidator.getLegalMoves(board, a2)
         assertTrue(legalMovesForPawn.isEmpty(), "Unrelated pawn should have no legal moves when king is in check")
+    }
+
+    @Test
+    fun testKingCannotMoveToFriendlyPiece() {
+        val board = createEmptyBoard()
+        val moveValidator = MoveValidator(board)
+        val e1 = Position('e', 1)
+        val f1 = Position('f', 1)
+
+        board.setPiece(e1, ChessPiece(e1, PieceType.KING, PieceColor.WHITE))
+        board.setPiece(f1, ChessPiece(f1, PieceType.PAWN, PieceColor.WHITE))
+        board.setPiece(Position('e', 8), ChessPiece(Position('e', 8), PieceType.KING, PieceColor.BLACK))
+
+        assertFalse(moveValidator.isLegalMove(board, e1, f1), "King cannot move to a square occupied by a friendly piece")
+    }
+
+    @Test
+    fun testKingCanCaptureEnemyPiece() {
+        val board = createEmptyBoard()
+        val moveValidator = MoveValidator(board)
+        val e1 = Position('e', 1)
+        val f1 = Position('f', 1)
+
+        board.setPiece(e1, ChessPiece(e1, PieceType.KING, PieceColor.WHITE))
+        board.setPiece(f1, ChessPiece(f1, PieceType.PAWN, PieceColor.BLACK))
+        board.setPiece(Position('e', 8), ChessPiece(Position('e', 8), PieceType.KING, PieceColor.BLACK))
+
+        assertTrue(moveValidator.isLegalMove(board, e1, f1), "King can capture an enemy piece adjacent to it")
+    }
+
+    @Test
+    fun testKingsideCastlingIsLegal() {
+        val board = createEmptyBoard()
+        val moveValidator = MoveValidator(board)
+        val e1 = Position('e', 1)
+        val h1 = Position('h', 1)
+        val g1 = Position('g', 1)
+
+        board.setPiece(e1, ChessPiece(e1, PieceType.KING, PieceColor.WHITE))
+        board.setPiece(h1, ChessPiece(h1, PieceType.ROOK, PieceColor.WHITE))
+        board.setPiece(Position('e', 8), ChessPiece(Position('e', 8), PieceType.KING, PieceColor.BLACK))
+
+        assertTrue(moveValidator.isLegalMove(board, e1, g1), "Kingside castling should be legal when conditions are met")
+    }
+
+    @Test
+    fun testQueensideCastlingIsLegal() {
+        val board = createEmptyBoard()
+        val moveValidator = MoveValidator(board)
+        val e1 = Position('e', 1)
+        val a1 = Position('a', 1)
+        val c1 = Position('c', 1)
+
+        board.setPiece(e1, ChessPiece(e1, PieceType.KING, PieceColor.WHITE))
+        board.setPiece(a1, ChessPiece(a1, PieceType.ROOK, PieceColor.WHITE))
+        board.setPiece(Position('e', 8), ChessPiece(Position('e', 8), PieceType.KING, PieceColor.BLACK))
+
+        assertTrue(moveValidator.isLegalMove(board, e1, c1), "Queenside castling should be legal when conditions are met")
+    }
+
+    @Test
+    fun testCastlingNotAllowedIfKingHasMoved() {
+        val board = createEmptyBoard()
+        val moveValidator = MoveValidator(board)
+        val e1 = Position('e', 1)
+        val h1 = Position('h', 1)
+        val g1 = Position('g', 1)
+
+        val king = ChessPiece(e1, PieceType.KING, PieceColor.WHITE)
+        val rook = ChessPiece(h1, PieceType.ROOK, PieceColor.WHITE)
+        board.setPiece(e1, king)
+        board.setPiece(h1, rook)
+        board.setPiece(Position('e', 8), ChessPiece(Position('e', 8), PieceType.KING, PieceColor.BLACK))
+
+        // Simulate king move
+        board.movePiece(e1, Position('e', 2))
+        board.movePiece(Position('e', 2), e1)
+
+        assertFalse(moveValidator.isLegalMove(board, e1, g1), "Castling should not be allowed if the king has moved")
+    }
+
+    @Test
+    fun testCastlingNotAllowedIfRookHasMoved() {
+        val board = createEmptyBoard()
+        val moveValidator = MoveValidator(board)
+        val e1 = Position('e', 1)
+        val h1 = Position('h', 1)
+        val g1 = Position('g', 1)
+
+        val king = ChessPiece(e1, PieceType.KING, PieceColor.WHITE)
+        val rook = ChessPiece(h1, PieceType.ROOK, PieceColor.WHITE)
+        board.setPiece(e1, king)
+        board.setPiece(h1, rook)
+        board.setPiece(Position('e', 8), ChessPiece(Position('e', 8), PieceType.KING, PieceColor.BLACK))
+
+        // Simulate rook move
+        board.movePiece(h1, Position('h', 2))
+        board.movePiece(Position('h', 2), h1)
+
+        assertFalse(moveValidator.isLegalMove(board, e1, g1), "Castling should not be allowed if the rook has moved")
+    }
+
+    @Test
+    fun testCastlingNotAllowedIfPiecesInterposed() {
+        val board = createEmptyBoard()
+        val moveValidator = MoveValidator(board)
+        val e1 = Position('e', 1)
+        val h1 = Position('h', 1)
+        val f1 = Position('f', 1)
+        val g1 = Position('g', 1)
+
+        board.setPiece(e1, ChessPiece(e1, PieceType.KING, PieceColor.WHITE))
+        board.setPiece(h1, ChessPiece(h1, PieceType.ROOK, PieceColor.WHITE))
+        board.setPiece(f1, ChessPiece(f1, PieceType.BISHOP, PieceColor.WHITE))
+        board.setPiece(Position('e', 8), ChessPiece(Position('e', 8), PieceType.KING, PieceColor.BLACK))
+
+        assertFalse(moveValidator.isLegalMove(board, e1, g1), "Castling should not be allowed if there are pieces between king and rook")
+    }
+
+    @Test
+    fun testCastlingNotAllowedIfPathOrKingUnderAttack() {
+        val board = createEmptyBoard()
+        val moveValidator = MoveValidator(board)
+        val e1 = Position('e', 1)
+        val h1 = Position('h', 1)
+        val g1 = Position('g', 1)
+        val f8 = Position('f', 8) // Black rook attacking f1 (square king passes through)
+
+        board.setPiece(e1, ChessPiece(e1, PieceType.KING, PieceColor.WHITE))
+        board.setPiece(h1, ChessPiece(h1, PieceType.ROOK, PieceColor.WHITE))
+        board.setPiece(f8, ChessPiece(f8, PieceType.ROOK, PieceColor.BLACK))
+        board.setPiece(Position('e', 8), ChessPiece(Position('e', 8), PieceType.KING, PieceColor.BLACK))
+
+        assertFalse(moveValidator.isLegalMove(board, e1, g1), "Castling should not be allowed if a path square is attacked")
     }
 }

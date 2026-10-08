@@ -22,6 +22,8 @@ class ChessBoard(
 
     fun getAllPositions() = positions
 
+    fun isOccupied(position: Position) = getPiece(position)!=null
+
     fun getPiece(position: Position): ChessPiece? = squares[position]
 
     fun getPieceState(position: Position): PiecePositionState? {
@@ -65,12 +67,7 @@ class ChessBoard(
             squares.remove(position)
             return
         }
-
         squares[position] = piece
-
-        if (!piecesHasBeenMoved.contains(piece)) {
-            piecesHasBeenMoved.add(piece)
-        }
     }
 
     fun movePiece(from: Position, to: Position): MoveResult {
@@ -129,10 +126,40 @@ class ChessBoard(
         )
     }
 
+    private fun getStep(from: Int, to: Int): Int = when {
+        to > from -> 1
+        to < from -> -1
+        else -> 0
+    }
+
+    fun isPathSafe(from: Position, to: Position, color: PieceColor): Boolean {
+        val rowStep = getStep(from.row, to.row)
+        val colStep = getStep(from.col, to.col)
+
+        var currentRow = from.row + rowStep
+        var currentCol = from.col + colStep
+
+        val enemyColor = color.opposite()
+        while (currentRow != to.row || currentCol != to.col) {
+            if (this.isSquareAttacked(Position(currentRow, currentCol), enemyColor)) {
+                return false
+            }
+            currentRow += rowStep
+            currentCol += colStep
+        }
+        return true
+    }
+
+    fun isPathSafeFromStartToEnd(from: Position, to: Position, color: PieceColor): Boolean {
+        val enemyColor = color.opposite()
+        if (this.isSquareAttacked(from, enemyColor) || this.isSquareAttacked(to, enemyColor)) return false
+        return this.isPathSafe(from, to, color)
+    }
+
 
     fun isPathClear(from: Position, to: Position): Boolean {
-        val rowStep = compareValues(to.row, from.row).let { if (it == 0) 0 else it / abs(it) }
-        val colStep = compareValues(to.col, from.col).let { if (it == 0) 0 else it / abs(it) }
+        val rowStep = getStep(from.row, to.row)
+        val colStep = getStep(from.col, to.col)
 
         var currentRow = from.row + rowStep
         var currentCol = from.col + colStep
@@ -146,6 +173,11 @@ class ChessBoard(
         }
 
         return true
+    }
+
+    fun isPathClearFromStartToEnd(from: Position, to: Position, color: PieceColor): Boolean {
+        if (this.isOccupied(from) || this.isOccupied(to)) return false
+        return this.isPathClear(from, to)
     }
 
     fun restore(other: ChessBoard) {
